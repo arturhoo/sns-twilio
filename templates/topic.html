@@ -9,7 +9,12 @@
   <body>
     <div class="container">
       <h2>{{ topic.arn }}</h2>
-        <p><a href="{{ topic.confirmation_url }}" target="_blank">Confirmation URL</a></p>
+        {% if topic.status == 0 %}
+          <span class="label label-warning">Unconfirmed</span>
+          <a href="{{ url_for('confirm_topic', topic_arn=topic.arn) }}"> Confirm topic</a>
+        {% else %}
+          <span class="label label-success">Confirmed</span>
+        {% endif %}
 
         <div class="row">
           <div class="col-6 col-sm-6 col-lg-6">

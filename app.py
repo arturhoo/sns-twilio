@@ -1,7 +1,8 @@
 # -*- coding: utf-8 -*-
-from flask import Flask, request, json, render_template
+from flask import Flask, request, json, render_template, redirect, url_for
 from flask.ext.sqlalchemy import SQLAlchemy
 from twilio.rest import TwilioRestClient
+from requests import get as rget
 from datetime import datetime as dt
 import local_settings
 
@@ -74,6 +75,17 @@ def show_topic(topic_arn):
         db.session.add(user)
         db.session.commit()
     return render_template('topic.html', topic=topic)
+
+
+@app.route('/topic/<string:topic_arn>/confirm', methods=['GET'])
+def confirm_topic(topic_arn):
+    topic = Snstopic.query.get(topic_arn)
+    if topic.status == 0:
+        r = rget(topic.confirmation_url)
+        if r.status_code == 200:
+            topic.status = 1
+            db.session.commit()
+    return redirect(url_for('show_topic', topic_arn=topic.arn))
 
 
 @app.route('/sns', methods=['POST'])

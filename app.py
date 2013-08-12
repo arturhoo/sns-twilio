@@ -2,6 +2,7 @@
 from flask import Flask, request, json, render_template
 from flask.ext.sqlalchemy import SQLAlchemy
 from twilio.rest import TwilioRestClient
+from datetime import datetime as dt
 import local_settings
 
 app = Flask(__name__)
@@ -40,6 +41,26 @@ class User(db.Model):
         return '<User %r>' % self.email
 
 
+class Notification(db.Model):
+    id = db.Column(db.String(36), primary_key=True)
+    timestamp = db.Column(db.DateTime())
+    subject = db.Column(db.String(160))
+    message = db.Column(db.String())
+    snstopic_arn = db.Column(db.String(60), db.ForeignKey('snstopic.arn'))
+    snstopic = db.relationship('Snstopic', backref=db.backref('notifications', lazy='dynamic'))
+
+
+    def __init__(self, id, timestamp, subject, message, snstopic):
+        self.id = id
+        self.timestamp = timestamp
+        self.subject = subject
+        self.message = message
+        self.snstopic = snstopic
+
+    def __repr__(self):
+        return '<Notification %r>' % self.id
+
+
 @app.route('/')
 def topics():
     return render_template('index.html', topics=Snstopic.query.all())
@@ -68,7 +89,15 @@ def sns():
         arn = request.headers.get('x-amz-sns-topic-arn')
         topic = Snstopic.query.get(arn)
         obj = json.loads(request.data)
+
+        notification_id = obj[u'MessageId']
+        timestamp = dt.strptime(obj[u'Timestamp'], '%Y-%m-%dT%H:%M:%S.%fZ')
         subject = obj[u'Subject']
+        message = obj[u'Message']
+        notification = Notification(notification_id, timestamp, subject, message, topic)
+        db.session.add(notification)
+        db.session.commit()
+
         for user in topic.users:
             message = twilio_client.sms.messages.create(to=user.telephone,
                                                         from_=local_settings.FROM_NUMBER,

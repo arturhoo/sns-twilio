@@ -13,8 +13,16 @@
 
         <div class="row">
           <div class="col-6 col-sm-6 col-lg-6">
-            <h3>Messages Feed</h3>
-            Messages go here!
+            <h3>Message Feed</h3>
+            {% if topic.notifications.all() %}
+              {% for notification in topic.notifications|sort(attribute='timestamp', reverse=True) %}
+                <h4>{{ notification.subject }}</h4>
+                <p>{{ notification.message }}</p>
+                <small>{{ notification.timestamp }}</small>
+              {% endfor %}
+            {% else %}
+              <p>No messages in this topic!</p>
+            {% endif %}
           </div>
           <div class="col-6 col-sm-6 col-lg-6">
             <h3>Users</h3>

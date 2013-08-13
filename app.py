@@ -4,6 +4,7 @@ from flask.ext.sqlalchemy import SQLAlchemy
 from twilio.rest import TwilioRestClient
 from requests import get as rget
 from datetime import datetime as dt
+from sns import is_message_signature_valid
 import local_settings
 
 app = Flask(__name__)
@@ -97,22 +98,23 @@ def confirm_topic(topic_arn):
 
 @app.route('/%s' % local_settings.SNS_ENDPOINT, methods=['POST'])
 def sns():
+    arn = request.headers.get('x-amz-sns-topic-arn')
+    obj = json.loads(request.data)
+    assert is_message_signature_valid(obj)
     if request.headers.get('x-amz-sns-message-type') == 'SubscriptionConfirmation':
-        arn = request.headers.get('x-amz-sns-topic-arn')
-        obj = json.loads(request.data)
         confirmation_url = obj[u'SubscribeURL']
         topic = Snstopic(arn, confirmation_url)
         db.session.add(topic)
         db.session.commit()
     elif request.headers.get('x-amz-sns-message-type') == 'Notification':
-        arn = request.headers.get('x-amz-sns-topic-arn')
         topic = Snstopic.query.get(arn)
-        obj = json.loads(request.data)
-
         notification_id = obj[u'MessageId']
         timestamp = dt.strptime(obj[u'Timestamp'], '%Y-%m-%dT%H:%M:%S.%fZ')
-        subject = local_settings.PRE_SUBJECT + obj[u'Subject']
         message = obj[u'Message']
+
+        msg_subject = obj[u'Subject'] if u'Subject' in obj.keys() else 'empty'
+        subject = local_settings.PRE_SUBJECT + msg_subject
+
         notification = Notification(notification_id, timestamp, subject, message, topic)
         db.session.add(notification)
         db.session.commit()

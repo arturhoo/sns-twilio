@@ -1,5 +1,6 @@
 # -*- coding: utf-8 -*-
-from flask import Flask, request, json, render_template, redirect, url_for, flash
+from flask import Flask, request, json, render_template, redirect, url_for, \
+    flash
 from flask.ext.sqlalchemy import SQLAlchemy
 from twilio.rest import TwilioRestClient
 from requests import get as rget
@@ -11,7 +12,8 @@ app = Flask(__name__)
 app.secret_key = local_settings.FLASK_SECRET_KEY
 app.config['SQLALCHEMY_DATABASE_URI'] = 'sqlite:///tmp/test.db'
 db = SQLAlchemy(app)
-twilio_client = TwilioRestClient(local_settings.ACCOUNT_SID, local_settings.AUTH_TOKEN)
+twilio_client = TwilioRestClient(local_settings.ACCOUNT_SID,
+                                 local_settings.AUTH_TOKEN)
 
 
 class Snstopic(db.Model):
@@ -33,7 +35,8 @@ class User(db.Model):
     email = db.Column(db.String(120))
     telephone = db.Column(db.String(20))
     snstopic_arn = db.Column(db.String(60), db.ForeignKey('snstopic.arn'))
-    snstopic = db.relationship('Snstopic', backref=db.backref('users', lazy='dynamic'))
+    snstopic = db.relationship('Snstopic', backref=db.backref('users',
+                                                              lazy='dynamic'))
 
     def __init__(self, email, telephone, snstopic):
         self.email = email
@@ -50,8 +53,8 @@ class Notification(db.Model):
     subject = db.Column(db.String(160))
     message = db.Column(db.String())
     snstopic_arn = db.Column(db.String(60), db.ForeignKey('snstopic.arn'))
-    snstopic = db.relationship('Snstopic', backref=db.backref('notifications', lazy='dynamic'))
-
+    snstopic = db.relationship('Snstopic', backref=db.backref('notifications',
+                                                              lazy='dynamic'))
 
     def __init__(self, id, timestamp, subject, message, snstopic):
         self.id = id
@@ -73,7 +76,8 @@ def topics():
 def show_topic(topic_arn):
     topic = Snstopic.query.get(topic_arn)
     if request.method == 'POST':
-        user = User(request.form.get('email'), request.form.get('telephone'), topic)
+        user = User(request.form.get('email'), request.form.get('telephone'),
+                    topic)
         db.session.add(user)
         db.session.commit()
         flash(u'User added!', 'success')
@@ -90,7 +94,8 @@ def confirm_topic(topic_arn):
             db.session.commit()
             flash(u'Subscription confirmed!', 'success')
         else:
-            flash(u'Subscription not confirmed! Response code was %i' % r.status_code, 'danger')
+            flash(u'Subscription not confirmed! Response code was %i' %
+                  r.status_code, 'danger')
     else:
         flash(u'Subscription already confirmed!', 'danger')
     return redirect(url_for('show_topic', topic_arn=topic.arn))
@@ -98,15 +103,16 @@ def confirm_topic(topic_arn):
 
 @app.route('/%s' % local_settings.SNS_ENDPOINT, methods=['POST'])
 def sns():
-    arn = request.headers.get('x-amz-sns-topic-arn')
+    headers = request.headers
+    arn = headers.get('x-amz-sns-topic-arn')
     obj = json.loads(request.data)
     assert is_message_signature_valid(obj)
-    if request.headers.get('x-amz-sns-message-type') == 'SubscriptionConfirmation':
+    if headers.get('x-amz-sns-message-type') == 'SubscriptionConfirmation':
         confirmation_url = obj[u'SubscribeURL']
         topic = Snstopic(arn, confirmation_url)
         db.session.add(topic)
         db.session.commit()
-    elif request.headers.get('x-amz-sns-message-type') == 'Notification':
+    elif headers.get('x-amz-sns-message-type') == 'Notification':
         topic = Snstopic.query.get(arn)
         notification_id = obj[u'MessageId']
         timestamp = dt.strptime(obj[u'Timestamp'], '%Y-%m-%dT%H:%M:%S.%fZ')
@@ -115,14 +121,15 @@ def sns():
         msg_subject = obj[u'Subject'] if u'Subject' in obj.keys() else 'empty'
         subject = local_settings.PRE_SUBJECT + msg_subject
 
-        notification = Notification(notification_id, timestamp, subject, message, topic)
+        notification = Notification(notification_id, timestamp, subject,
+                                    message, topic)
         db.session.add(notification)
         db.session.commit()
 
         for user in topic.users:
-            message = twilio_client.sms.messages.create(to=user.telephone,
-                                                        from_=local_settings.FROM_NUMBER,
-                                                        body=subject)
+            create_sms = twilio_client.sms.messages.create
+            message = creae_sms(to=user.telephone,
+                                from_=local_settings.FROM_NUMBER, body=subject)
     return '', 200
 
 if __name__ == '__main__':

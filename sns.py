@@ -21,7 +21,7 @@ def build_subscription_string(msg):
               msg[u'MessageId'] + '\nSubscribeURL\n' + msg[u'SubscribeURL'] + \
               '\nTimestamp\n' + msg[u'Timestamp'] + '\nToken\n' + \
               msg[u'Token'] + '\nTopicArn\n' + msg[u'TopicArn'] + \
-              '\nType\n' + msg[u'Type']
+              '\nType\n' + msg[u'Type'] + '\n'
     return sub_str
 
 

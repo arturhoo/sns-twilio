@@ -95,7 +95,7 @@ def confirm_topic(topic_arn):
     return redirect(url_for('show_topic', topic_arn=topic.arn))
 
 
-@app.route('/sns', methods=['POST'])
+@app.route('/%s' % local_settings.SNS_ENDPOINT, methods=['POST'])
 def sns():
     if request.headers.get('x-amz-sns-message-type') == 'SubscriptionConfirmation':
         arn = request.headers.get('x-amz-sns-topic-arn')

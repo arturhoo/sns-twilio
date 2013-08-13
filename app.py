@@ -135,7 +135,7 @@ def sns():
     headers = request.headers
     arn = headers.get('x-amz-sns-subscription-arn')
     obj = json.loads(request.data)
-    if app.debug != True:
+    if app.debug is not True:
         assert is_message_signature_valid(obj)
 
     if headers.get('x-amz-sns-message-type') == 'SubscriptionConfirmation':

@@ -16,7 +16,7 @@
       {% if topic.notifications.all() %}
         {% for notification in topic.notifications|sort(attribute='timestamp', reverse=True) %}
           <h4>{{ notification.subject }}</h4>
-          <p>{{ notification.message }}</p>
+          <p style="word-wrap: break-word;">{{ notification.message }}</p>
           <small>{{ notification.timestamp.strftime('%m/%d/%Y %H:%M:%S UTC') }}</small>
         {% endfor %}
       {% else %}

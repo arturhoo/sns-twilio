@@ -1,14 +1,22 @@
+## 0.1.3 (unreleased)
+
+FEATURES:
+
+** general: admin login across the whole web application
+
+
 ## 0.1.2 (unreleased)
 
 FEATURES:
 
-* general: misconception between topic and subscription addressed
 * general: users can be deleted
 * general: unsubscribe
 
 IMPROVEMENTS
 
-* models: snstopic is now a subscription with proper attributes
+* general: misconception between topic and subscription addressed
+* models: snstopics is are now subscriptions with proper attributes
+
 
 ## 0.1.1 (August 13, 2013)
 
@@ -23,6 +31,7 @@ IMPROVEMENTS:
 BUG FIXES:
 
 * controllers: notifications without subject are correctly handled
+
 
 ## 0.1.0 (August 13, 2013)
 

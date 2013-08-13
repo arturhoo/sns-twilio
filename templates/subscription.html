@@ -4,10 +4,15 @@
   <h2>{{ subscription.arn }}</h2>
   <hr>
   {% if subscription.status == 0 %}
-    <span class="label label-warning">Unconfirmed</span>
-    <a href="{{ url_for('confirm_subscription', subscription_arn=subscription.arn) }}"> Confirm subscription</a>
-  {% else %}
-    <span class="label label-success">Confirmed</span>
+    <span class="label label-warning">Not subscribed</span>
+    <a href="{{ url_for('subscribe', subscription_arn=subscription.arn) }}"> Confirm subscription</a>
+  {% elif subscription.status == 1 %}
+    <span class="label label-success">Subscribed</span>
+    <a href="{{ url_for('unsubscribe', subscription_arn=subscription.arn) }}"> Unsubscribe</a>
+  {% elif subscription.status == 2 %}
+    <span class="label label-info">Unsubscription requested</span>
+  {% elif subscription.status == 3 %}
+    <span class="label label-default">Unsubscribed</span>
   {% endif %}
 
   <div class="row">

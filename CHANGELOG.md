@@ -1,3 +1,15 @@
+## 0.1.2 (unreleased)
+
+FEATURES:
+
+* general: misconception between topic and subscription addressed
+* general: users can be deleted
+* general: unsubscribe
+
+IMPROVEMENTS
+
+* models: snstopic is now a subscription with proper attributes
+
 ## 0.1.1 (August 13, 2013)
 
 FEATURES:

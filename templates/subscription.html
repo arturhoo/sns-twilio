@@ -1,11 +1,11 @@
 {% extends "layout.html" %}
 {% block body %}
 <div class="container">
-  <h2>{{ topic.arn }}</h2>
+  <h2>{{ subscription.arn }}</h2>
   <hr>
-  {% if topic.status == 0 %}
+  {% if subscription.status == 0 %}
     <span class="label label-warning">Unconfirmed</span>
-    <a href="{{ url_for('confirm_topic', topic_arn=topic.arn) }}"> Confirm topic</a>
+    <a href="{{ url_for('confirm_subscription', subscription_arn=subscription.arn) }}"> Confirm subscription</a>
   {% else %}
     <span class="label label-success">Confirmed</span>
   {% endif %}
@@ -13,21 +13,21 @@
   <div class="row">
     <div class="col-6 col-sm-6 col-lg-6">
       <h3>Message Feed</h3>
-      {% if topic.notifications.all() %}
-        {% for notification in topic.notifications|sort(attribute='timestamp', reverse=True) %}
+      {% if subscription.notifications.all() %}
+        {% for notification in subscription.notifications|sort(attribute='timestamp', reverse=True) %}
           <h4>{{ notification.subject }}</h4>
           <p style="word-wrap: break-word;">{{ notification.message }}</p>
           <small>{{ notification.timestamp.strftime('%m/%d/%Y %H:%M:%S UTC') }}</small>
         {% endfor %}
       {% else %}
-        <p>No messages in this topic!</p>
+        <p>No messages in this subscription!</p>
       {% endif %}
     </div>
 
     <div class="col-6 col-sm-6 col-lg-6">
       <h3>Users</h3>
 
-        {% if topic.users.all() %}
+        {% if subscription.users.all() %}
           <table class="table table-striped">
             <thead>
               <tr>
@@ -36,7 +36,7 @@
               </tr>
             </thead>
             <tbody>
-              {% for user in topic.users %}
+              {% for user in subscription.users %}
                 <tr>
                   <td>{{ user.email }}</td>
                   <td>{{ user.telephone }}</td>
@@ -45,12 +45,12 @@
             </tbody>
           </table>
         {% else %}
-          <p>No users subscribed to this topic</p>
+          <p>No users subscribed to this subscription</p>
         {% endif %}
 
       <h3>Add User</h3>
 
-      <form method=post action="{{ url_for('show_topic', topic_arn=topic.arn) }}">
+      <form method=post action="{{ url_for('show_subscription', subscription_arn=subscription.arn) }}">
         <fieldset>
           <div class="form-group">
             <label for="email">Email address</label>

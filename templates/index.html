@@ -1,14 +1,14 @@
 {% extends "layout.html" %}
 {% block body %}
 <div class="container">
-  <h1>Topics</h1>
+  <h1>Subscriptions</h1>
 
-  {% if topics %}
-    {% for topic in topics %}
-      <p><a href="{{ url_for('show_topic', topic_arn=topic.arn) }}">{{ topic.arn }}</a></p>
+  {% if subscriptions %}
+    {% for subscription in subscriptions %}
+      <p><a href="{{ url_for('show_subscription', subscription_arn=subscription.arn) }}">{{ subscription.arn }}</a></p>
     {% endfor %}
   {% else %}
-    <p>There are no topics!</p>
+    <p>There are no subscriptions!</p>
   {% endif %}
 </div>
 {% endblock %}

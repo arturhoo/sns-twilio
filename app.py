@@ -16,7 +16,7 @@ twilio_client = TwilioRestClient(local_settings.ACCOUNT_SID,
                                  local_settings.AUTH_TOKEN)
 
 
-class Snstopic(db.Model):
+class Subscription(db.Model):
     arn = db.Column(db.String(60), primary_key=True)
     status = db.Column(db.Integer)
     confirmation_url = db.Column(db.String(600))
@@ -34,14 +34,15 @@ class User(db.Model):
     id = db.Column(db.Integer, primary_key=True)
     email = db.Column(db.String(120))
     telephone = db.Column(db.String(20))
-    snstopic_arn = db.Column(db.String(60), db.ForeignKey('snstopic.arn'))
-    snstopic = db.relationship('Snstopic', backref=db.backref('users',
-                                                              lazy='dynamic'))
+    subscription_arn = db.Column(db.String(60),
+                                 db.ForeignKey('subscription.arn'))
+    subscription = db.relationship('Subscription',
+                                   backref=db.backref('users', lazy='dynamic'))
 
-    def __init__(self, email, telephone, snstopic):
+    def __init__(self, email, telephone, subscription):
         self.email = email
         self.telephone = telephone
-        self.snstopic = snstopic
+        self.subscription = subscription
 
     def __repr__(self):
         return '<User %r>' % self.email
@@ -52,45 +53,48 @@ class Notification(db.Model):
     timestamp = db.Column(db.DateTime())
     subject = db.Column(db.String(160))
     message = db.Column(db.String())
-    snstopic_arn = db.Column(db.String(60), db.ForeignKey('snstopic.arn'))
-    snstopic = db.relationship('Snstopic', backref=db.backref('notifications',
-                                                              lazy='dynamic'))
+    subscription_arn = db.Column(db.String(60),
+                                 db.ForeignKey('subscription.arn'))
+    subscription = db.relationship('Subscription',
+                                   backref=db.backref('notifications',
+                                                      lazy='dynamic'))
 
-    def __init__(self, id, timestamp, subject, message, snstopic):
+    def __init__(self, id, timestamp, subject, message, subscription):
         self.id = id
         self.timestamp = timestamp
         self.subject = subject
         self.message = message
-        self.snstopic = snstopic
+        self.subscription = subscription
 
     def __repr__(self):
         return '<Notification %r>' % self.id
 
 
 @app.route('/')
-def topics():
-    return render_template('index.html', topics=Snstopic.query.all())
+def subscriptions():
+    return render_template('index.html',
+                           subscriptions=Subscription.query.all())
 
 
-@app.route('/topic/<string:topic_arn>', methods=['GET', 'POST'])
-def show_topic(topic_arn):
-    topic = Snstopic.query.get(topic_arn)
+@app.route('/subscription/<string:subscription_arn>', methods=['GET', 'POST'])
+def show_subscription(subscription_arn):
+    subscription = Subscription.query.get(subscription_arn)
     if request.method == 'POST':
         user = User(request.form.get('email'), request.form.get('telephone'),
-                    topic)
+                    subscription)
         db.session.add(user)
         db.session.commit()
         flash(u'User added!', 'success')
-    return render_template('topic.html', topic=topic)
+    return render_template('subscription.html', subscription=subscription)
 
 
-@app.route('/topic/<string:topic_arn>/confirm', methods=['GET'])
-def confirm_topic(topic_arn):
-    topic = Snstopic.query.get(topic_arn)
-    if topic.status == 0:
-        r = rget(topic.confirmation_url)
+@app.route('/subscription/<string:subscription_arn>/confirm', methods=['GET'])
+def confirm_subscription(subscription_arn):
+    subscription = Subscription.query.get(subscription_arn)
+    if subscription.status == 0:
+        r = rget(subscription.confirmation_url)
         if r.status_code == 200:
-            topic.status = 1
+            subscription.status = 1
             db.session.commit()
             flash(u'Subscription confirmed!', 'success')
         else:
@@ -98,22 +102,25 @@ def confirm_topic(topic_arn):
                   r.status_code, 'danger')
     else:
         flash(u'Subscription already confirmed!', 'danger')
-    return redirect(url_for('show_topic', topic_arn=topic.arn))
+    return redirect(url_for('show_subscription',
+                    subscription_arn=subscription.arn))
 
 
 @app.route('/%s' % local_settings.SNS_ENDPOINT, methods=['POST'])
 def sns():
     headers = request.headers
-    arn = headers.get('x-amz-sns-topic-arn')
+    arn = headers.get('x-amz-sns-subscription-arn')
     obj = json.loads(request.data)
-    assert is_message_signature_valid(obj)
+    if app.debug != True:
+        assert is_message_signature_valid(obj)
+
     if headers.get('x-amz-sns-message-type') == 'SubscriptionConfirmation':
         confirmation_url = obj[u'SubscribeURL']
-        topic = Snstopic(arn, confirmation_url)
-        db.session.add(topic)
+        subscription = Subscription(arn, confirmation_url)
+        db.session.add(subscription)
         db.session.commit()
     elif headers.get('x-amz-sns-message-type') == 'Notification':
-        topic = Snstopic.query.get(arn)
+        subscription = Subscription.query.get(arn)
         notification_id = obj[u'MessageId']
         timestamp = dt.strptime(obj[u'Timestamp'], '%Y-%m-%dT%H:%M:%S.%fZ')
         message = obj[u'Message']
@@ -122,11 +129,11 @@ def sns():
         subject = local_settings.PRE_SUBJECT + msg_subject
 
         notification = Notification(notification_id, timestamp, subject,
-                                    message, topic)
+                                    message, subscription)
         db.session.add(notification)
         db.session.commit()
 
-        for user in topic.users:
+        for user in subscription.users:
             create_sms = twilio_client.sms.messages.create
             message = creae_sms(to=user.telephone,
                                 from_=local_settings.FROM_NUMBER, body=subject)

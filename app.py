@@ -111,7 +111,7 @@ def sns():
 
         notification_id = obj[u'MessageId']
         timestamp = dt.strptime(obj[u'Timestamp'], '%Y-%m-%dT%H:%M:%S.%fZ')
-        subject = obj[u'Subject']
+        subject = local_settings.PRE_SUBJECT + obj[u'Subject']
         message = obj[u'Message']
         notification = Notification(notification_id, timestamp, subject, message, topic)
         db.session.add(notification)

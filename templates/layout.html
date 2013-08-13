@@ -4,17 +4,30 @@
     <title>SNS-Twilio</title>
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <link href="{{ url_for('static', filename='bootstrap.min.css') }}" rel="stylesheet"  media="screen">
+    <link href="{{ url_for('static', filename='bootstrap-glyphicons.css') }}" rel="stylesheet"  media="screen">
+    <link href="{{ url_for('static', filename='custom.css') }}" rel="stylesheet"  media="screen">
   </head>
   <body>
-  {% with messages = get_flashed_messages(with_categories=true) %}
-    {% if messages %}
-      {% for category, message in messages %}
-        <div class="alert alert-{{ category }} text-center">{{ message }}</div>
-      {% endfor %}
-    {% endif %}
-  {% endwith %}
-  {% block body %}
-  {% endblock %}
+    <nav class="navbar navbar-static-top" role="navigation">
+      <div class="container">
+        <a class="navbar-brand" href="{{ url_for('subscriptions') }}">SNS-Twilio</a>
+        <ul class="nav navbar-nav">
+          <li><a href="{{ url_for('subscriptions') }}">Subscriptions</a></li>
+          <li><a href="#">Help</a></li>
+        </ul>
+      </div>
+    </nav>
+
+    {% with messages = get_flashed_messages(with_categories=true) %}
+      {% if messages %}
+        {% for category, message in messages %}
+          <div class="alert alert-{{ category }} text-center" style="margin-top: -20px;">{{ message }}</div>
+        {% endfor %}
+      {% endif %}
+    {% endwith %}
+
+    {% block body %}
+    {% endblock %}
   </body>
   <footer class="text-center">
     <hr>

@@ -1,83 +1,70 @@
-<!doctype html>
-<html>
-  <head>
-    <title>Topic</title>
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <link href="{{ url_for('static', filename='bootstrap.min.css') }}" rel="stylesheet"  media="screen">
-  </head>
+{% extends "layout.html" %}
+{% block body %}
+<div class="container">
+  <h2>{{ topic.arn }}</h2>
+  <hr>
+  {% if topic.status == 0 %}
+    <span class="label label-warning">Unconfirmed</span>
+    <a href="{{ url_for('confirm_topic', topic_arn=topic.arn) }}"> Confirm topic</a>
+  {% else %}
+    <span class="label label-success">Confirmed</span>
+  {% endif %}
 
-  <body>
-    <div class="container">
-      <h2>{{ topic.arn }}</h2>
-        {% if topic.status == 0 %}
-          <span class="label label-warning">Unconfirmed</span>
-          <a href="{{ url_for('confirm_topic', topic_arn=topic.arn) }}"> Confirm topic</a>
+  <div class="row">
+    <div class="col-6 col-sm-6 col-lg-6">
+      <h3>Message Feed</h3>
+      {% if topic.notifications.all() %}
+        {% for notification in topic.notifications|sort(attribute='timestamp', reverse=True) %}
+          <h4>{{ notification.subject }}</h4>
+          <p>{{ notification.message }}</p>
+          <small>{{ notification.timestamp.strftime('%m/%d/%Y %H:%M:%S UTC') }}</small>
+        {% endfor %}
+      {% else %}
+        <p>No messages in this topic!</p>
+      {% endif %}
+    </div>
+
+    <div class="col-6 col-sm-6 col-lg-6">
+      <h3>Users</h3>
+
+        {% if topic.users.all() %}
+          <table class="table table-striped">
+            <thead>
+              <tr>
+                <th>Email</th>
+                <th>Telephone</th>
+              </tr>
+            </thead>
+            <tbody>
+              {% for user in topic.users %}
+                <tr>
+                  <td>{{ user.email }}</td>
+                  <td>{{ user.telephone }}</td>
+                </tr>
+              {% endfor %}
+            </tbody>
+          </table>
         {% else %}
-          <span class="label label-success">Confirmed</span>
+          <p>No users subscribed to this topic</p>
         {% endif %}
 
-        <div class="row">
-          <div class="col-6 col-sm-6 col-lg-6">
-            <h3>Message Feed</h3>
-            {% if topic.notifications.all() %}
-              {% for notification in topic.notifications|sort(attribute='timestamp', reverse=True) %}
-                <h4>{{ notification.subject }}</h4>
-                <p>{{ notification.message }}</p>
-                <small>{{ notification.timestamp }}</small>
-              {% endfor %}
-            {% else %}
-              <p>No messages in this topic!</p>
-            {% endif %}
+      <h3>Add User</h3>
+
+      <form method=post action="{{ url_for('show_topic', topic_arn=topic.arn) }}">
+        <fieldset>
+          <div class="form-group">
+            <label for="email">Email address</label>
+            <input type="text" class="form-control" id="email" name="email" placeholder="Enter email">
           </div>
-          <div class="col-6 col-sm-6 col-lg-6">
-            <h3>Users</h3>
-
-              {% if topic.users.all() %}
-                <table class="table table-striped">
-                  <thead>
-                    <tr>
-                      <th>Email</th>
-                      <th>Telephone</th>
-                    </tr>
-                  </thead>
-                  <tbody>
-                    {% for user in topic.users %}
-                      <tr>
-                        <td>{{ user.email }}</td>
-                        <td>{{ user.telephone }}</td>
-                      </tr>
-                    {% endfor %}
-                  </tbody>
-                </table>
-              {% else %}
-                <p>No users subscribed to this topic</p>
-              {% endif %}
-
-            <h3>Add User</h3>
-
-            <form method=post action="{{ url_for('show_topic', topic_arn=topic.arn) }}">
-              <fieldset>
-                <div class="form-group">
-                  <label for="email">Email address</label>
-                  <input type="text" class="form-control" id="email" name="email" placeholder="Enter email">
-                </div>
-                <div class="form-group">
-                  <label for="telephone">Mobile phone number</label>
-                  <input type="text" class="form-control" id="telephone" name="telephone" placeholder="Enter mobile number">
-                </div>
-                <button type="submit" class="btn btn-default">Submit</button>
-              </fieldset>
-            </form>
+          <div class="form-group">
+            <label for="telephone">Mobile phone number</label>
+            <input type="text" class="form-control" id="telephone" name="telephone" placeholder="Enter mobile number">
           </div>
-
-        </div>
-
+          <button type="submit" class="btn btn-default">Submit</button>
+        </fieldset>
+      </form>
     </div>
-  </body>
-  <footer style="text-align: center;">
-    <hr>
-    <div class="container">
-      <a href="{{ url_for('topics') }}">Main</a>
-    </div>
-  </footer>
-</html>
+
+  </div>
+</div>
+{% endblock %}

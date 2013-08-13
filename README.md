@@ -12,7 +12,7 @@ There should be a `tmp` folder (the SQLite3 DB will sit there) and a `local_sett
 ACCOUNT_SID = "d41d8cd98f00b204e9800998ecf8427e"
 AUTH_TOKEN = "df5ea29924d39c3be8785734f13169c6"
 FROM_NUMBER = "+1415556789"
-
+FLASK_SECRET_KEY = "2095497fef8978477de913f147446421"
 ```
 
 ## Thanks

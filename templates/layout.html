@@ -1,0 +1,25 @@
+<!doctype html>
+<html>
+  <head>
+    <title>SNS-Twilio</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <link href="{{ url_for('static', filename='bootstrap.min.css') }}" rel="stylesheet"  media="screen">
+  </head>
+  <body>
+  {% with messages = get_flashed_messages(with_categories=true) %}
+    {% if messages %}
+      {% for category, message in messages %}
+        <div class="alert alert-{{ category }} text-center">{{ message }}</div>
+      {% endfor %}
+    {% endif %}
+  {% endwith %}
+  {% block body %}
+  {% endblock %}
+  </body>
+  <footer class="text-center">
+    <hr>
+    <div class="container">
+      <a href="{{ url_for('topics') }}">Main</a>
+    </div>
+  </footer>
+</html>

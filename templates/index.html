@@ -1,22 +1,14 @@
-<!doctype html>
-<html>
-  <head>
-    <title>Topics</title>
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <link href="{{ url_for('static', filename='bootstrap.min.css') }}" rel="stylesheet"  media="screen">
-  </head>
+{% extends "layout.html" %}
+{% block body %}
+<div class="container">
+  <h1>Topics</h1>
 
-  <body>
-    <div class="container">
-      <h1>Topics</h1>
-
-      {% if topics %}
-        {% for topic in topics %}
-          <p><a href="{{ url_for('show_topic', topic_arn=topic.arn) }}">{{ topic.arn }}</a></p>
-        {% endfor %}
-      {% else %}
-        <p>There are no topics!</p>
-      {% endif %}
-    </div>
-  </body>
-</html>
+  {% if topics %}
+    {% for topic in topics %}
+      <p><a href="{{ url_for('show_topic', topic_arn=topic.arn) }}">{{ topic.arn }}</a></p>
+    {% endfor %}
+  {% else %}
+    <p>There are no topics!</p>
+  {% endif %}
+</div>
+{% endblock %}

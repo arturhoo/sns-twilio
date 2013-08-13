@@ -1,5 +1,5 @@
 # -*- coding: utf-8 -*-
-from flask import Flask, request, json, render_template, redirect, url_for
+from flask import Flask, request, json, render_template, redirect, url_for, flash
 from flask.ext.sqlalchemy import SQLAlchemy
 from twilio.rest import TwilioRestClient
 from requests import get as rget
@@ -7,6 +7,7 @@ from datetime import datetime as dt
 import local_settings
 
 app = Flask(__name__)
+app.secret_key = local_settings.FLASK_SECRET_KEY
 app.config['SQLALCHEMY_DATABASE_URI'] = 'sqlite:///tmp/test.db'
 db = SQLAlchemy(app)
 twilio_client = TwilioRestClient(local_settings.ACCOUNT_SID, local_settings.AUTH_TOKEN)
@@ -28,7 +29,7 @@ class Snstopic(db.Model):
 
 class User(db.Model):
     id = db.Column(db.Integer, primary_key=True)
-    email = db.Column(db.String(120), unique=True)
+    email = db.Column(db.String(120))
     telephone = db.Column(db.String(20))
     snstopic_arn = db.Column(db.String(60), db.ForeignKey('snstopic.arn'))
     snstopic = db.relationship('Snstopic', backref=db.backref('users', lazy='dynamic'))
@@ -74,6 +75,7 @@ def show_topic(topic_arn):
         user = User(request.form.get('email'), request.form.get('telephone'), topic)
         db.session.add(user)
         db.session.commit()
+        flash(u'User added!', 'success')
     return render_template('topic.html', topic=topic)
 
 
@@ -85,6 +87,11 @@ def confirm_topic(topic_arn):
         if r.status_code == 200:
             topic.status = 1
             db.session.commit()
+            flash(u'Subscription confirmed!', 'success')
+        else:
+            flash(u'Subscription not confirmed! Response code was %i' % r.status_code, 'danger')
+    else:
+        flash(u'Subscription already confirmed!', 'danger')
     return redirect(url_for('show_topic', topic_arn=topic.arn))
 
 

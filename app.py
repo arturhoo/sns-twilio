@@ -191,8 +191,9 @@ def sns():
 
         for user in subscription.users:
             create_sms = twilio_client.sms.messages.create
-            message = creae_sms(to=user.telephone,
-                                from_=local_settings.FROM_NUMBER, body=subject)
+            message = create_sms(to=user.telephone,
+                                 from_=local_settings.FROM_NUMBER,
+                                 body=subject)
     return '', 200
 
 if __name__ == '__main__':

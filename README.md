@@ -24,6 +24,65 @@ SNS_ENDPOINT = "b113256183c5983c9989d8ff86cf62b4"
 PRE_SUBJECT = ""
 ```
 
+## Deploying
+
+We are running SNS-Twilio in production using:
+
+- OS: Ubuntu Server12.04
+- Static server and reverse proxy: Nginx
+- App server: uWSGI
+- Monitoring: Supervisor
+
+Here are the relevant configuration files:
+
+`/etc/nginx/sites-available/sns-twilio`
+```
+server {
+        listen PORT;
+        server_name SERVER_NAME;
+
+        location / { try_files $uri @yourapplication; }
+
+        location @yourapplication {
+                include uwsgi_params;
+                uwsgi_pass unix:/tmp/sns-twilio.sock;
+        }
+
+        location /static {
+                alias /PATH/TO/SNS-TWILIO/static/;
+                autoindex off;
+        }
+
+        location /favicon.ico {
+                alias /PATH/TO/SNS-TWILIO/static/favicon.ico;
+        }
+
+}
+```
+
+`sns-twilio.ini`
+```
+[uwsgi]
+socket = /tmp/%n.sock
+module = app:app
+processes = 1
+master = 1
+logto = /var/log/uwsgi/%n.log
+virtualenv = /PATH/TO/VIRTUALENV
+chmod-socket = 777
+```
+
+`/etc/supervisor/conf.d/sns-twilio.conf`
+```
+[program:sns-twilio]
+command=/PATH/TO/VIRTUALENV/bin/uwsgi --ini sns-twilio.ini
+directory=/PATH/TO/SNS-TWILIO/sns-twilio
+user=USER
+stdout_logfile=/var/log/supervisor/sns-twilio-out.log
+stderr_logfile=/var/log/supervisor/sns-twilio-err.log
+autostart=true
+```
+
 ## Thanks
 
 - Flask

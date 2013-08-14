@@ -11,6 +11,7 @@ FEATURES:
 
 * general: users can be deleted
 * general: unsubscribe
+* general: a custom favicon
 
 IMPROVEMENTS
 

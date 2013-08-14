@@ -5,7 +5,7 @@ FEATURES:
 ** general: admin login across the whole web application
 
 
-## 0.1.2 (unreleased)
+## 0.1.2 (August 14, 2013)
 
 FEATURES:
 

@@ -4,9 +4,42 @@
   <h2>Subscriptions</h2>
 
   {% if subscriptions %}
-    {% for subscription in subscriptions %}
-      <p><a href="{{ url_for('show_subscription', subscription_arn=subscription.arn) }}">{{ subscription.alias }}</a></p>
-    {% endfor %}
+    <table class="table table-hover">
+      <thead>
+        <tr>
+          <th>Alias</th>
+          <th>Arn</th>
+          <th>Subscription Date</th>
+        </tr>
+      </thead>
+      <tbody>
+        {% for subscription in subscriptions %}
+          <tr>
+            <td>
+              <a href="{{ url_for('show_subscription', subscription_arn=subscription.arn) }}" class="muted-black-cell-link">
+                <span class="text-black">
+                  {{ subscription.alias }}
+                </span>
+              </a>
+            </td>
+            <td>
+              <a href="{{ url_for('show_subscription', subscription_arn=subscription.arn) }}" class="muted-black-cell-link">
+                <span class="text-muted">
+                  {{ subscription.arn }}
+                </span>
+              </a>
+            </td>
+            <td>
+              <a href="{{ url_for('show_subscription', subscription_arn=subscription.arn) }}" class="muted-black-cell-link">
+                <span class="text-black">
+                  {{ subscription.subscription_date.strftime('%m/%d/%Y %H:%M:%S UTC') }}
+                </span>
+              </a>
+            </td>
+          </tr>
+        {% endfor %}
+      </tbody>
+    </table>
   {% else %}
     <p>There are no subscriptions!</p>
   {% endif %}

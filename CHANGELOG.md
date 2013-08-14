@@ -18,7 +18,9 @@ IMPROVEMENTS
 * general: sqlite database now lives on the `db` dir
 * models: snstopics is are now subscriptions with proper attributes
 * models: user's email is now a generic name
+* models: subscriptions now have a subscription date
 * controllers: validates that all user's attributes are not empty
+* views: subscriptions page is presented as a table with more information
 
 
 ## 0.1.1 (August 13, 2013)

@@ -1,0 +1,14 @@
+.muted-black-cell-link {
+    display: block;
+    text-decoration: none;
+    decoration: none;
+}
+
+.muted-black-cell-link:hover {
+    text-decoration: none;
+    decoration: none;
+}
+
+.text-black {
+    color: black;
+}

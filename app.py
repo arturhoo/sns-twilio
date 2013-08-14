@@ -20,12 +20,14 @@ class Subscription(db.Model):
     arn = db.Column(db.String(120), primary_key=True)
     alias = db.Column(db.String(120))
     status = db.Column(db.Integer)
+    subscription_date = db.Column(db.DateTime())
     subscribe_url = db.Column(db.String(600))
     unsubscribe_url = db.Column(db.String(600))
 
-    def __init__(self, arn, subscribe_url):
+    def __init__(self, arn, subscription_date, subscribe_url):
         self.arn = arn
         self.alias = self.arn.split(':')[-2]
+        self.subscription_date = subscription_date
         self.status = 0
         self.subscribe_url = subscribe_url
         self.unsubscribe_url = None
@@ -159,7 +161,9 @@ def sns():
 
     if headers.get('x-amz-sns-message-type') == 'SubscriptionConfirmation':
         subscribe_url = obj[u'SubscribeURL']
-        subscription = Subscription(arn, subscribe_url)
+        subscription_date = dt.strptime(obj[u'Timestamp'],
+                                        '%Y-%m-%dT%H:%M:%S.%fZ')
+        subscription = Subscription(arn, subscription_date, subscribe_url)
         db.session.add(subscription)
         db.session.commit()
 

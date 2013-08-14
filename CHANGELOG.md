@@ -15,7 +15,10 @@ FEATURES:
 IMPROVEMENTS
 
 * general: misconception between topic and subscription addressed
+* general: sqlite database now lives on the `db` dir
 * models: snstopics is are now subscriptions with proper attributes
+* models: user's email is now a generic name
+* controllers: validates that all user's attributes are not empty
 
 
 ## 0.1.1 (August 13, 2013)

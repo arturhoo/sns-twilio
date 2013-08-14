@@ -1,19 +1,25 @@
 {% extends "layout.html" %}
 {% block body %}
 <div class="container">
-  <h2>{{ subscription.arn }}</h2>
+  <h2 >{{ subscription.alias }}</h2>
+  <div style="margin-bottom: 40px;">
+    <p class="pull-left text-muted">{{ subscription.arn }}</p>
+    <div class="pull-right">
+      {% if subscription.status == 0 %}
+        <a href="{{ url_for('subscribe', subscription_arn=subscription.arn) }}"> Confirm subscription</a>
+        <span class="label label-warning">Not subscribed</span>
+      {% elif subscription.status == 1 %}
+        <a href="{{ url_for('unsubscribe', subscription_arn=subscription.arn) }}"> Unsubscribe</a>
+        <span class="label label-success">Subscribed</span>
+      {% elif subscription.status == 2 %}
+        <span class="label label-info">Unsubscription requested</span>
+      {% elif subscription.status == 3 %}
+        <span class="label label-default">Unsubscribed</span>
+      {% endif %}
+    </div>
+  </div>
+
   <hr>
-  {% if subscription.status == 0 %}
-    <span class="label label-warning">Not subscribed</span>
-    <a href="{{ url_for('subscribe', subscription_arn=subscription.arn) }}"> Confirm subscription</a>
-  {% elif subscription.status == 1 %}
-    <span class="label label-success">Subscribed</span>
-    <a href="{{ url_for('unsubscribe', subscription_arn=subscription.arn) }}"> Unsubscribe</a>
-  {% elif subscription.status == 2 %}
-    <span class="label label-info">Unsubscription requested</span>
-  {% elif subscription.status == 3 %}
-    <span class="label label-default">Unsubscribed</span>
-  {% endif %}
 
   <div class="row">
     <div class="col-6 col-sm-6 col-lg-6">
@@ -36,15 +42,25 @@
           <table class="table table-striped">
             <thead>
               <tr>
-                <th>Email</th>
+                <th>Name</th>
                 <th>Telephone</th>
+                <th>Delete</th>
               </tr>
             </thead>
             <tbody>
               {% for user in subscription.users %}
                 <tr>
-                  <td>{{ user.email }}</td>
+                  <td>{{ user.name }}</td>
                   <td>{{ user.telephone }}</td>
+                  <td>
+                    <form action="{{ url_for('delete_user', subscription_arn=subscription.arn, user_id=user.id) }}" method="POST">
+                      <button type="submit" class="btn btn-danger btn-xs">
+                        <span class="glyphicon glyphicon-remove" style="position: relative; top: 2px;">
+                        </span> Delete
+                      </button>
+                      <!-- <input type="submit" value="Delete entry 10" /> -->
+                    </form>
+                  </td>
                 </tr>
               {% endfor %}
             </tbody>
@@ -55,11 +71,11 @@
 
       <h3>Add User</h3>
 
-      <form method=post action="{{ url_for('show_subscription', subscription_arn=subscription.arn) }}">
+      <form method="POST" action="{{ url_for('add_user', subscription_arn=subscription.arn) }}">
         <fieldset>
           <div class="form-group">
-            <label for="email">Email address</label>
-            <input type="text" class="form-control" id="email" name="email" placeholder="Enter email">
+            <label for="name">Name</label>
+            <input type="text" class="form-control" id="name" name="name" placeholder="Enter name">
           </div>
           <div class="form-group">
             <label for="telephone">Mobile phone number</label>

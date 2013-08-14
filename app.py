@@ -1,6 +1,6 @@
 # -*- coding: utf-8 -*-
 from flask import Flask, request, json, render_template, redirect, url_for, \
-    flash
+    flash, _request_ctx_stack
 from flask.ext.sqlalchemy import SQLAlchemy
 from twilio.rest import TwilioRestClient
 from requests import get as rget
@@ -10,20 +10,22 @@ import local_settings
 
 app = Flask(__name__)
 app.secret_key = local_settings.FLASK_SECRET_KEY
-app.config['SQLALCHEMY_DATABASE_URI'] = 'sqlite:///tmp/test.db'
+app.config['SQLALCHEMY_DATABASE_URI'] = 'sqlite:///db/sns-twilio.db'
 db = SQLAlchemy(app)
 twilio_client = TwilioRestClient(local_settings.ACCOUNT_SID,
                                  local_settings.AUTH_TOKEN)
 
 
 class Subscription(db.Model):
-    arn = db.Column(db.String(60), primary_key=True)
+    arn = db.Column(db.String(120), primary_key=True)
+    alias = db.Column(db.String(120))
     status = db.Column(db.Integer)
     subscribe_url = db.Column(db.String(600))
     unsubscribe_url = db.Column(db.String(600))
 
     def __init__(self, arn, subscribe_url):
         self.arn = arn
+        self.alias = self.arn.split(':')[-2]
         self.status = 0
         self.subscribe_url = subscribe_url
         self.unsubscribe_url = None
@@ -34,20 +36,20 @@ class Subscription(db.Model):
 
 class User(db.Model):
     id = db.Column(db.Integer, primary_key=True)
-    email = db.Column(db.String(120))
+    name = db.Column(db.String(120))
     telephone = db.Column(db.String(20))
     subscription_arn = db.Column(db.String(60),
                                  db.ForeignKey('subscription.arn'))
     subscription = db.relationship('Subscription',
                                    backref=db.backref('users', lazy='dynamic'))
 
-    def __init__(self, email, telephone, subscription):
-        self.email = email
+    def __init__(self, name, telephone, subscription):
+        self.name = name
         self.telephone = telephone
         self.subscription = subscription
 
     def __repr__(self):
-        return '<User %r>' % self.email
+        return '<User %r>' % self.name
 
 
 class Notification(db.Model):
@@ -78,20 +80,38 @@ def subscriptions():
                            subscriptions=Subscription.query.all())
 
 
-@app.route('/subscription/<string:subscription_arn>', methods=['GET', 'POST'])
+@app.route('/subscription/<string:subscription_arn>', methods=['GET'])
 def show_subscription(subscription_arn):
     subscription = Subscription.query.get(subscription_arn)
-    if request.method == 'POST':
-        user = User(request.form.get('email'), request.form.get('telephone'),
+
+    return render_template('subscription.html', subscription=subscription)
+
+@app.route('/subscription/<string:subscription_arn>/users', methods=['POST'])
+def add_user(subscription_arn):
+    subscription = Subscription.query.get(subscription_arn)
+    if any(request.form.get(attr) == '' for attr in ['name', 'telephone']):
+        flash("All User's attributes are required", 'danger')
+    else:
+        user = User(request.form.get('name'), request.form.get('telephone'),
                     subscription)
         db.session.add(user)
         db.session.commit()
         flash(u'User added!', 'success')
-    return render_template('subscription.html', subscription=subscription)
+    return redirect(url_for('show_subscription',
+                            subscription_arn=subscription.arn))
+
+@app.route('/subscription/<string:subscription_arn>/users/<int:user_id>/delete', methods=['POST'])
+def delete_user(subscription_arn, user_id):
+    user = User.query.get(user_id)
+
+    db.session.delete(user)
+    db.session.commit()
+    flash(u'User deleted!', 'success')
+    return redirect(url_for('show_subscription',
+                            subscription_arn=subscription_arn))
 
 
-@app.route('/subscription/<string:subscription_arn>/subscribe',
-           methods=['GET'])
+@app.route('/subscription/<string:subscription_arn>/subscribe', methods=['GET'])
 def subscribe(subscription_arn):
     subscription = Subscription.query.get(subscription_arn)
     if subscription.status == 0:
@@ -109,8 +129,7 @@ def subscribe(subscription_arn):
                     subscription_arn=subscription.arn))
 
 
-@app.route('/subscription/<string:subscription_arn>/unsubscribe',
-           methods=['GET'])
+@app.route('/subscription/<string:subscription_arn>/unsubscribe', methods=['GET'])
 def unsubscribe(subscription_arn):
     subscription = Subscription.query.get(subscription_arn)
     if not subscription.unsubscribe_url:

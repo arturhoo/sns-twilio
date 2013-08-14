@@ -3,9 +3,8 @@
   <head>
     <title>SNS-Twilio</title>
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <link href="{{ url_for('static', filename='bootstrap.min.css') }}" rel="stylesheet"  media="screen">
-    <link href="{{ url_for('static', filename='bootstrap-glyphicons.css') }}" rel="stylesheet"  media="screen">
-    <link href="{{ url_for('static', filename='custom.css') }}" rel="stylesheet"  media="screen">
+    <link href="{{ url_for('static', filename='css/bootstrap.min.css') }}" rel="stylesheet"  media="screen">
+    <link href="{{ url_for('static', filename='css/bootstrap-glyphicons.css') }}" rel="stylesheet"  media="screen">
   </head>
   <body>
     <nav class="navbar navbar-static-top" role="navigation">
@@ -26,13 +25,9 @@
       {% endif %}
     {% endwith %}
 
+    <div style="margin-bottom: -20px;"></div>
+
     {% block body %}
     {% endblock %}
   </body>
-  <footer class="text-center">
-    <hr>
-    <div class="container">
-      <a href="{{ url_for('subscriptions') }}">Main</a>
-    </div>
-  </footer>
 </html>

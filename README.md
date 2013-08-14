@@ -28,14 +28,15 @@ PRE_SUBJECT = ""
 
 We are running SNS-Twilio in production using:
 
-- OS: Ubuntu Server12.04
+- OS: Ubuntu Server 12.04
 - Static server and reverse proxy: Nginx
 - App server: uWSGI
 - Monitoring: Supervisor
 
 Here are the relevant configuration files:
 
-`/etc/nginx/sites-available/sns-twilio`
+> `/etc/nginx/sites-available/sns-twilio`
+
 ```
 server {
         listen PORT;
@@ -60,7 +61,8 @@ server {
 }
 ```
 
-`sns-twilio.ini`
+> `sns-twilio.ini`
+
 ```
 [uwsgi]
 socket = /tmp/%n.sock
@@ -72,7 +74,8 @@ virtualenv = /PATH/TO/VIRTUALENV
 chmod-socket = 777
 ```
 
-`/etc/supervisor/conf.d/sns-twilio.conf`
+> `/etc/supervisor/conf.d/sns-twilio.conf`
+
 ```
 [program:sns-twilio]
 command=/PATH/TO/VIRTUALENV/bin/uwsgi --ini sns-twilio.ini

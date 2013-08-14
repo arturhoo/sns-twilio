@@ -85,8 +85,62 @@ def subscriptions():
 @app.route('/subscription/<string:subscription_arn>', methods=['GET'])
 def show_subscription(subscription_arn):
     subscription = Subscription.query.get(subscription_arn)
-
     return render_template('subscription.html', subscription=subscription)
+
+
+@app.route('/subscription/<string:subscription_arn>/subscribe', methods=['POST'])
+def subscribe(subscription_arn):
+    subscription = Subscription.query.get(subscription_arn)
+    if subscription.status == 0:
+        r = rget(subscription.subscribe_url)
+        if r.status_code == 200:
+            subscription.status = 1
+            db.session.commit()
+            flash(u'Subscription confirmed!', 'success')
+        else:
+            flash(u'Subscription not confirmed! Response code was %i' %
+                  r.status_code, 'danger')
+    else:
+        flash(u'Subscription already confirmed!', 'danger')
+    return redirect(url_for('show_subscription',
+                    subscription_arn=subscription.arn))
+
+
+@app.route('/subscription/<string:subscription_arn>/unsubscribe', methods=['POST'])
+def unsubscribe(subscription_arn):
+    subscription = Subscription.query.get(subscription_arn)
+    if not subscription.unsubscribe_url:
+        flash(u'A message must be received to unsubscribe', 'danger')
+    elif subscription.status == 1:
+        r = rget(subscription.unsubscribe_url)
+        if r.status_code == 200:
+            subscription.status = 2
+            db.session.commit()
+            flash(u'Ubsubscription request sent!', 'success')
+        else:
+            flash((u'Unsubscription request unsuccessful!',
+                   u' Response code was %i' % r.status_code), 'danger')
+    else:
+        flash(u'Subscription is not valid to be unsubscribed!', 'danger')
+    return redirect(url_for('show_subscription',
+                    subscription_arn=subscription.arn))
+
+
+@app.route('/subscription/<string:subscription_arn>/delete', methods=['POST'])
+def delete_subscription(subscription_arn):
+    subscription = Subscription.query.get(subscription_arn)
+    if subscription.status != 3:
+        flash('Unsubscribe first', 'danger')
+        return redirect(url_for('show_subscription',
+                                subscription_arn=subscription_arn))
+    else:
+        for user in subscription.users:
+            db.session.delete(user)
+        db.session.delete(subscription)
+        db.session.commit()
+        flash(u'Subscription deleted!', 'success')
+        return redirect(url_for('subscriptions'))
+
 
 @app.route('/subscription/<string:subscription_arn>/users', methods=['POST'])
 def add_user(subscription_arn):
@@ -105,50 +159,11 @@ def add_user(subscription_arn):
 @app.route('/subscription/<string:subscription_arn>/users/<int:user_id>/delete', methods=['POST'])
 def delete_user(subscription_arn, user_id):
     user = User.query.get(user_id)
-
     db.session.delete(user)
     db.session.commit()
     flash(u'User deleted!', 'success')
     return redirect(url_for('show_subscription',
                             subscription_arn=subscription_arn))
-
-
-@app.route('/subscription/<string:subscription_arn>/subscribe', methods=['GET'])
-def subscribe(subscription_arn):
-    subscription = Subscription.query.get(subscription_arn)
-    if subscription.status == 0:
-        r = rget(subscription.subscribe_url)
-        if r.status_code == 200:
-            subscription.status = 1
-            db.session.commit()
-            flash(u'Subscription confirmed!', 'success')
-        else:
-            flash(u'Subscription not confirmed! Response code was %i' %
-                  r.status_code, 'danger')
-    else:
-        flash(u'Subscription already confirmed!', 'danger')
-    return redirect(url_for('show_subscription',
-                    subscription_arn=subscription.arn))
-
-
-@app.route('/subscription/<string:subscription_arn>/unsubscribe', methods=['GET'])
-def unsubscribe(subscription_arn):
-    subscription = Subscription.query.get(subscription_arn)
-    if not subscription.unsubscribe_url:
-        flash(u'A message must be received to unsubscribe', 'danger')
-    elif subscription.status == 1:
-        r = rget(subscription.unsubscribe_url)
-        if r.status_code == 200:
-            subscription.status = 2
-            db.session.commit()
-            flash(u'Ubsubscription request sent!', 'success')
-        else:
-            flash((u'Unsubscription request unsuccessful!',
-                   u' Response code was %i' % r.status_code), 'danger')
-    else:
-        flash(u'Subscription is not valid to be unsubscribed!', 'danger')
-    return redirect(url_for('show_subscription',
-                    subscription_arn=subscription.arn))
 
 
 @app.route('/%s' % local_settings.SNS_ENDPOINT, methods=['POST'])

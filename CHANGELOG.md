@@ -10,6 +10,7 @@ FEATURES:
 FEATURES:
 
 * general: users can be deleted
+* general: subscriptions, once canceled, can be deleted
 * general: unsubscribe
 * general: a custom favicon
 

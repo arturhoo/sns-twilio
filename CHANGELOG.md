@@ -2,14 +2,14 @@
 
 FEATURES:
 
-** general: admin login across the whole web application
+* general: admin login across the whole web application
 
 
 ## 0.1.3 (August 15, 2013)
 
 IMPROVEMENTS:
 
-** sns: ensure signing cert url is from (https) amazonaws.com
+* sns: ensure signing cert url is from (https) amazonaws.com
 
 
 ## 0.1.2 (August 14, 2013)

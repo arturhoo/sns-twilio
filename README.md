@@ -95,6 +95,7 @@ autostart=true
 - Flask
 - SQL Alchemy
 - M2Crypto
+- Requests
 
 ## License
 

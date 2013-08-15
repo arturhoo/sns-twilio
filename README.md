@@ -96,6 +96,7 @@ autostart=true
 - SQL Alchemy
 - M2Crypto
 - Requests
+- Bootstrap
 
 ## License
 

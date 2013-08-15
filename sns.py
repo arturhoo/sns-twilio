@@ -2,7 +2,8 @@
 from requests import get as rget
 from pprint import pprint
 from M2Crypto import X509
-import base64
+from base64 import b64decode
+from re import compile as regex_compile, IGNORECASE
 
 
 def build_notification_string(msg):
@@ -28,7 +29,13 @@ def build_subscription_string(msg):
 def is_message_signature_valid(msg):
     if msg[u'SignatureVersion'] != '1':
         raise Exception('Wrong signature version')
+
     signing_url = msg[u'SigningCertURL']
+    prog = regex_compile(r'^https.*amazonaws\.com\/.*$', IGNORECASE)
+    if not prog.match(signing_url):
+        raise Exception("Cert is not hosted at AWS URL (https): %s",
+                        signing_url)
+
     r = rget(signing_url)
     cert = X509.load_cert_string(str(r.text))
     str_to_sign = None
@@ -42,7 +49,7 @@ def is_message_signature_valid(msg):
     pubkey.reset_context(md='sha1')
     pubkey.verify_init()
     pubkey.verify_update(str_to_sign.encode())
-    result = pubkey.verify_final(base64.b64decode(msg['Signature']))
+    result = pubkey.verify_final(b64decode(msg['Signature']))
     if result != 1:
         raise Exception('Notification could not be confirmed')
     else:

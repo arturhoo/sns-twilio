@@ -4,6 +4,10 @@ A gateway between AWS' SNS and Twilio. Since SNS only sends SMSes to the US, thi
 
 There is a basic web interface for admin tasks.
 
+<p align="center">
+  <img src="https://raw.github.com/arturhoo/sns-twilio/gh-pages/imgs/sns-twilio.png" alt="Sample screenshot"/>
+</p>
+
 ## Setup
 
 General system requirements: `build-essential`, `swig`.

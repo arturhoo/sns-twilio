@@ -33,7 +33,7 @@
             <td>
               <a href="{{ url_for('show_subscription', subscription_arn=subscription.arn) }}" class="muted-black-cell-link">
                 <span class="text-black">
-                  {{ subscription.subscription_date.strftime('%m/%d/%Y %H:%M:%S UTC') }}
+                  {{ subscription.subscription_date.strftime('%m/%d/%Y %H:%M UTC') }}
                 </span>
               </a>
             </td>

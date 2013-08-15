@@ -83,7 +83,7 @@ chmod-socket = 777
 ```
 [program:sns-twilio]
 command=/PATH/TO/VIRTUALENV/bin/uwsgi --ini sns-twilio.ini
-directory=/PATH/TO/SNS-TWILIO/sns-twilio
+directory=/PATH/TO/SNS-TWILIO
 user=USER
 stdout_logfile=/var/log/supervisor/sns-twilio-out.log
 stderr_logfile=/var/log/supervisor/sns-twilio-err.log

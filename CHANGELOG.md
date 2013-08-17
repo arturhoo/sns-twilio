@@ -4,6 +4,10 @@ FEATURES:
 
 * general: admin login across the whole web application
 
+IMPROVEMENTS:
+
+* views: show datetime of last received notification in subscriptions view
+
 
 ## 0.1.3 (August 15, 2013)
 

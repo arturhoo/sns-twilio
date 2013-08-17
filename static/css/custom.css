@@ -1,3 +1,7 @@
+body {
+    padding-bottom: 40px;
+}
+
 .muted-black-cell-link {
     display: block;
     text-decoration: none;

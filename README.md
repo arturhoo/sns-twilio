@@ -12,7 +12,7 @@ There is a basic web interface for admin tasks.
 
 General system requirements: `build-essential`, `swig`.
 
-The python requirements are specified in `requirements.txt`. **Special attetion must be paid to M2Crypto**, as it should be manually built on Ubuntu 12.04, [there is a script that can be used](https://github.com/arturhoo/sns-twilio/wiki/M2Crypto-on-Ubuntu-12.04).
+The python requirements are specified in `requirements.txt`.
 
 A `local_settings.py` file must exist. Here is how it should be populated:
 

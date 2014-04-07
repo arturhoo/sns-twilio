@@ -1,6 +1,6 @@
 Flask==0.10.1
 Flask-SQLAlchemy==1.0
-pep8==1.4.6
-twilio==3.5.1
+pep8==1.5.4
+twilio==3.6.6
 requests==1.2.3
-M2Crypto==0.21.1
+M2Crypto==0.22.3

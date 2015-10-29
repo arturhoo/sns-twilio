@@ -31,7 +31,7 @@ def is_message_signature_valid(msg):
         raise Exception('Wrong signature version')
 
     signing_url = msg[u'SigningCertURL']
-    prog = regex_compile(r'^https.*amazonaws\.com\/.*$', IGNORECASE)
+    prog = regex_compile(r'^https://sns\.[-a-z0-9]+\.amazonaws\.com/.*$', IGNORECASE)
     if not prog.match(signing_url):
         raise Exception("Cert is not hosted at AWS URL (https): %s",
                         signing_url)
